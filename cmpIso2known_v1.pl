@@ -3,7 +3,7 @@
 ########################################
 #
 # File Name:
-#   compare.annot.pl
+#   cmpIso2known.pl
 # 
 # Description:
 #   add comparison comments to the last column

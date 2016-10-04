@@ -2,7 +2,7 @@
 
 Tookit for full length transcriptome annotation, including isoform diversity, alternative splicing, comparison to known transcriptome, and splicing coupling. 
 
-## Usage
+## Content
 
   1. isoform diversity analysis
 
@@ -12,6 +12,7 @@ Tookit for full length transcriptome annotation, including isoform diversity, al
 
   4. alternative splicing coupling analysis
 
+  5. ORF diversity caused by transcript diversity
 
 ## Contact:
     xi (dot) wang (at) mdc-berlin (dot) de
