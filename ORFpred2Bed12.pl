@@ -44,8 +44,10 @@ open(OUT2, ">$outfile2") || die "Can't open $outfile2 for writing!\n";
 while(<IN>) { 
   chomp;
   my @x = split; 
-  my @a = split /\t/, $RNA{$x[0]}; 
-  my @b = split /\t/, $RNA{$x[0]}; 
+  my @y = split /\|/, $x[0];
+  if(! exists $RNA{$y[0]}) { print STDERR "WARNING: Isoform ID $y[0] cannot be found in $infile1\n"; next} 
+  my @a = split /\t/, $RNA{$y[0]}; 
+  my @b = split /\t/, $RNA{$y[0]}; 
   my @sizes = split ",", $a[10];
   my @starts = split ",", $a[11];
   my ($cur_s_bl, $cur_e_bl, $th_s, $th_e);

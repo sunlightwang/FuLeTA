@@ -1,6 +1,8 @@
 # FuLeTA
 
-Tookit for full length transcriptome annotation, including isoform diversity, alternative splicing, comparison to known transcriptome, and splicing coupling. 
+Tookit for full length transcriptome annotation analysis, including isoform diversity, alternative splicing among transcripts, comparison to known transcriptome, splicing coupling, and their consequences on ORF diveristy. 
+
+* This is part of the rat hippocampus transcriptome annotation project, where hybrid sequencing technology (PacBio + Illumina) was applied to get comprehensive/accurate transcriptome landscape for rat hippocampus. 
 
 ## Content
 
