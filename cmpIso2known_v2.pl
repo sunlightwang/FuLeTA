@@ -109,7 +109,7 @@ foreach $gene_num (sort {$a <=> $b} keys %genes) {
       next if( Blocks::refflatSize(Blocks::intersectRefflat($new_isofs[$i], $known_isofs[$j])) == 0 ); ## non-overlap with current known isoform
       my $tmp = Blocks::cmpIsoform_refflat($new_isofs[$i], $known_isofs[$j], $min_5UTR_diff_len, $min_3UTR_diff_len); 
       next if($tmp eq "NA");
-      my $tmp_n = Blocks::isoformCmpRst_blockNum($tmp);
+      my $tmp_n = Blocks::isoformCmpRst_diffblockNum($tmp);
       my @tmp_a = split /\t/, $known_isofs[$j];
       #my $isof_cmp = join ":", ($cluster_gene_names, $tmp_a[1], Blocks::format_isoformCmpRst($tmp));
       my $isof_cmp = join ":", ($cluster_gene_names, $tmp_a[1], Blocks::isoformCmp_spliceType(Blocks::format_isoformCmpRst($tmp)));

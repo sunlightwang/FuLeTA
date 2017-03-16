@@ -1,3 +1,5 @@
+#!/usr/bin/perl -w
+
 package Blocks;
 
 use strict;
@@ -442,6 +444,22 @@ sub isoformCmpRst_blockNum {
   return "NA" if($_[0] eq "NA");
   my @a = split /:/, $_[0];
   return length $a[0];
+}
+
+#################
+# isoformCmpRst_diffblockNum
+# input: [overlap1]:[overlap2]:[len1_len2_len3_len4_len5]
+# output: number of diff blocks
+sub isoformCmpRst_diffblockNum {
+  return "NA" if($_[0] eq "NA");
+  my @a = split /:/, $_[0];
+  my @a0 = split //, $a[0]; 
+  my @a1 = split //, $a[1]; 
+  my @tmp; 
+  for my $i (0..$#a0) { 
+    push @tmp, abs($a1[$i] - $a0[$i]);
+  }
+  return sum(@tmp);
 }
 
 #################
