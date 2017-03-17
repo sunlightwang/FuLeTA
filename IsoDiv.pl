@@ -3,7 +3,7 @@
 ########################################
 #
 # File Name:
-#   cmpIso2known_v2.pl
+#   IsoDiv.pl
 # 
 # Description:
 #   
@@ -27,12 +27,10 @@ use Blocks;
 my $min_5UTR_diff_len = 100;
 my $min_3UTR_diff_len = 100;
 
-my $usage = "$0 <new_isoform.refflat> <known_isoform.refflat> <new_isoform_comments.refflat>\n";
+my $usage = "$0 <isoform.refflat> <isoform_comments.refflat>\n";
 my $infile1 = shift || die $usage;
-my $infile2 = shift || die $usage;
 my $outfile = shift || die $usage;
-open(NEW, $infile1) || die "Can't open $infile1 for reading!\n";
-open(KNOWN, $infile2) || die "Can't open $infile2 for reading!\n";
+open(ISO, $infile1) || die "Can't open $infile1 for reading!\n";
 open(OUT, ">$outfile") || die "Can't open $outfile for writing!\n";
 
 ## save new and known isoform into %isofs
