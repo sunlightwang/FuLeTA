@@ -110,10 +110,11 @@ foreach my $g (keys %GL_ORF) {
       next if( $tmp_size == 0 ); ## non-overlap with current known isoform
       my $tmp = Blocks::cmpIsoform_refflat(Blocks::bedToRefflat($ORFs[$i]), Blocks::bedToRefflat($aORFs_in[$j])); 
       next if($tmp eq "NA");
-      my $tmp_n = Blocks::isoformCmpRst_blockNum($tmp);
+      #my $tmp_n = Blocks::isoformCmpRst_blockNum($tmp);
+      my $tmp_n = Blocks::isoformCmpRst_diffblockNum($tmp);
       my $tmp_k = $tmp_size / $tmp_n;
       $intersectBlockNum{$tmp_k} = $aORFs_in[$j];
-      $intersectBed{$tmp_bed} ++; 
+      $intersectBed{$tmp_bed} = $aORFs_in[$j]; 
     }
     ### new isoform with a known gene locus
     if(scalar(keys %intersectBlockNum)==0) {
