@@ -447,10 +447,10 @@ sub cmpBlocks {
   my @iso2 = split "\t", $i2; 
   return "NA" unless ($iso1[0] eq $iso2[0] && $iso1[5] eq $iso2[5]); 
   return "NA" if($iso1[1] > $iso2[2] || $iso1[2] < $iso2[1]);
-  my @s1 = split ",", $iso1[10];
-  my @l1 = split ",", $iso1[11];
-  my @s2 = split ",", $iso2[10];
-  my @l2 = split ",", $iso2[11];
+  my @s1 = split ",", $iso1[11];
+  my @l1 = split ",", $iso1[10];
+  my @s2 = split ",", $iso2[11];
+  my @l2 = split ",", $iso2[10];
   my (@es1, @ee1, @es2, @ee2); 
   for(my $i=0; $i<$iso1[9]; $i++) { 
     $es1[$i] = $s1[$i] + $iso1[1];
@@ -487,6 +487,11 @@ sub cmpBlocks {
     }
   }
   ## @overlap1, @overlap2 have their values: 1 for exon, 0 for intron 
+  if($iso1[5] eq '-') { 
+    @overlap1 = reverse @overlap1;
+    @overlap2 = reverse @overlap2;
+    @block_size = reverse @block_size;
+  }
   return join ":", (join("", @overlap1), join("", @overlap2), join("_",@block_size));
 }
 
@@ -500,14 +505,31 @@ sub cmpBlocks_cigar {
   my @overlap1 = split //, $e[0];
   my @overlap2 = split //, $e[1];
   my @size = split /_/, $e[2];
-  my @cigar;
+  my (@cigar_size, @cigar_ch);
   for(my $i=0; $i<@overlap1; $i++) { 
     next unless($overlap1[$i] || $overlap2[$i]); 
-    push @cigar, "$size[$i]M" if($overlap1[$i] && $overlap2[$i]);
-    push @cigar, "$size[$i]I" if($overlap1[$i] && !$overlap2[$i]);
-    push @cigar, "$size[$i]D" if(!$overlap1[$i] && $overlap2[$i]);
+    push @cigar_size, "$size[$i]";
+    push @cigar_ch, "M" if($overlap1[$i] && $overlap2[$i]);
+    push @cigar_ch, "I" if($overlap1[$i] && !$overlap2[$i]);
+    push @cigar_ch, "D" if(!$overlap1[$i] && $overlap2[$i]);
   } 
-  ##TODO tide cigar
+  ##tidy cigar
+  my (@cigar_tidy_size, @cigar_tidy_ch, @cigar); 
+  my $idx = 0;
+  $cigar_tidy_size[$idx] = $cigar_size[0]; 
+  $cigar_tidy_ch[$idx] = $cigar_ch[0]; 
+  for(my $i=1; $i<@cigar_size; $i++) { 
+    if($cigar_tidy_ch[$idx] eq $cigar_ch[$i]) { 
+      $cigar_tidy_size[$idx] += $cigar_size[$i]; 
+    } else {
+      $idx ++; 
+      $cigar_tidy_ch[$idx] = $cigar_ch[$i];
+      $cigar_tidy_size[$idx] = $cigar_size[$i];
+    }
+  } 
+  for(my $i=0; $i<@cigar_tidy_size; $i++) {
+    $cigar[$i] = "$cigar_tidy_size[$i]$cigar_tidy_ch[$i]";
+  }
   return(join "_", @cigar); 
 }
 #################

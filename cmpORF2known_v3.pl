@@ -165,9 +165,10 @@ foreach my $g (keys %GL_ORF) {
     }
     # others
     my $type = &cmpORF($ORFs[$i], $nearest_ORF); 
+    my $cigar = &ORF_align_cigar($ORFs[$i], $nearest_ORF); 
     my $ORF_size_annot = Blocks::bed12Size($nearest_ORF);
     $type = "ORF-Same" if($type eq "N-term-truncation" && ($ORF_size_annot - $ORF_size_FL) <= $NtermTruncBaseAllow);
-    print OUT $ORFs[$i]."\t".$cluster_gene_names.":".$nearest_ORF_a[3].":".$type."_".$ORF_size_FL."_".$ORF_size_annot."\n"; #other types
+    print OUT $ORFs[$i]."\t".$cluster_gene_names.":".$nearest_ORF_a[3].":".$type."_".$ORF_size_FL."_".$ORF_size_annot.":".$cigar."\n"; #other types
   }
 } 
 close OUT;
@@ -219,31 +220,47 @@ sub cmpORF { ## cmp two overlap ORFs || overlap: N, C, in-frame/diff-frame/parti
   }
 }
 
-sub ORF_align_cigar { ## cmp two overlap ORFs || overlap: N, C, in-frame/diff-frame/partial-inframe
+sub ORF_align_cigar { ## align two overlap ORFs for cigar
   my $a1 = $_[0]; # ORF in study
   my $a2 = $_[1]; # annotated
-  #print STDERR "\n$a1\n$a2\n";
-  my @aa1 = split /\t/, $a1;
-  my @aa2 = split /\t/, $a2;
-  my $int_bed = Blocks::intersectBed($a1, $a2);
+  #my $int_bed = Blocks::intersectBed($a1, $a2);
+  my $raw_cigar = Blocks::cmpBlocks_cigar(Blocks::cmpBlocks($a1, $a2));
+  my $ORF_cigar = &ORF_frame_cigar($raw_cigar);
   #print STDERR "$int_bed\n";
-  # isoforms
-  my @iii_s = split /,/, $iii[11];
-  my $n_diff_frame = 0; 
-  for(my $i=0; $i<$iii[9]; $i++) { 
-    my $pos = $iii[1] + $iii_s[$i]; 
-    my $pos_dist1 =  &pos2bed12start($pos, $a1);
-    my $pos_dist2 =  &pos2bed12start($pos, $a2);
-    #print STDERR "$pos_dist1 \t $pos_dist2\n";
-    $n_diff_frame ++ unless(($pos_dist1 % 3) == ($pos_dist2 % 3));
+  #print STDERR "$raw_cigar\n";
+  #print STDERR "$ORF_cigar\n";
+  #my @int = split /\t/, $int_bed; 
+  #my @int_l = split /,/, $int[10];
+  #my @int_s = split /,/, $int[11];
+  #for(my $i=0; $i<$int[9]; $i++) { 
+  #  my $pos = $int[1] + $int_s[$i]; 
+  #  my $pos_dist1 =  &pos2bed12start($pos, $a1);
+  #  my $pos_dist2 =  &pos2bed12start($pos, $a2);
+  #  print "diff frame\n" unless(($pos_dist1 % 3) == ($pos_dist2 % 3));
+  #}
+  return $ORF_cigar;
+}
+
+sub ORF_frame_cigar {
+  my $raw_cigar = $_[0]; 
+  my @e = split /_/, $raw_cigar;
+  my $res = 0; 
+  my ($ch, @cigar); 
+  for(my $i=0; $i<@e; $i++) { 
+    $e[$i] =~ /(\d+)([MID])/; 
+    if($2 eq "M") { 
+      $cigar[$i] = $e[$i] unless($res);
+      $cigar[$i] = $1."O" if($res);
+    } else {
+      $cigar[$i] = $e[$i];
+      if($2 eq "I") { 
+        $res = ($res + $1) % 3;
+      } else {
+        $res = ($res - $1) % 3;
+      }
+    }
   }
-  if($n_diff_frame == 0) { 
-    return "inframe-isoform"; 
-  } elsif ($n_diff_frame == $iii[9])  { 
-    return "diff-frame-isoform";
-  } else { 
-    return "partial-inframe-isoform";
-  }
+  return join "_", @cigar; 
 }
 
 sub pos2bed12start { 
