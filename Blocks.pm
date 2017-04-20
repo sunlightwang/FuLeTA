@@ -437,6 +437,80 @@ sub cmpIsoform_refflat {
 }
 
 #################
+# cmpBlocks
+# input: bed12_new, bed12_known
+# output: [overlap1]:[overlap2]:[len1_len2_len3_len4_len5]
+sub cmpBlocks {
+  my $i1 = $_[0];
+  my $i2 = $_[1];
+  my @iso1 = split "\t", $i1;
+  my @iso2 = split "\t", $i2; 
+  return "NA" unless ($iso1[0] eq $iso2[0] && $iso1[5] eq $iso2[5]); 
+  return "NA" if($iso1[1] > $iso2[2] || $iso1[2] < $iso2[1]);
+  my @s1 = split ",", $iso1[10];
+  my @l1 = split ",", $iso1[11];
+  my @s2 = split ",", $iso2[10];
+  my @l2 = split ",", $iso2[11];
+  my (@es1, @ee1, @es2, @ee2); 
+  for(my $i=0; $i<$iso1[9]; $i++) { 
+    $es1[$i] = $s1[$i] + $iso1[1];
+    $ee1[$i] = $s1[$i] + $l1[$i] + $iso1[1];
+  }
+  for(my $i=0; $i<$iso2[9]; $i++) { 
+    $es2[$i] = $s2[$i] + $iso2[1];
+    $ee2[$i] = $s2[$i] + $l2[$i] + $iso2[1];
+  }
+  ## block boundaries 
+  my @uniq_bnd = sort {$a <=> $b} uniq (@es1, @ee1, @es2, @ee2);
+  my (@overlap1, @overlap2, @block_size); 
+  my $p1 = 0;
+  my $p2 = 0;
+  for(my $k=0; $k<$#uniq_bnd; $k++) { 
+    push @block_size, $uniq_bnd[$k+1] - $uniq_bnd[$k]; 
+    # p1 for isoform 1
+    if($p1 >= @es1 || $es1[$p1]>=$uniq_bnd[$k+1]) {
+      $overlap1[$k] = 0; 
+    } else {
+      $overlap1[$k] = 1;
+      if($ee1[$p1] == $uniq_bnd[$k+1]) {
+        $p1 ++;
+      }
+    }
+    # p2 for isoform 2 
+    if($p2 >= @es2 || $es2[$p2]>=$uniq_bnd[$k+1]) {
+      $overlap2[$k] = 0; 
+    } else {
+      $overlap2[$k] = 1;
+      if($ee2[$p2] == $uniq_bnd[$k+1]) {
+        $p2 ++;
+      }
+    }
+  }
+  ## @overlap1, @overlap2 have their values: 1 for exon, 0 for intron 
+  return join ":", (join("", @overlap1), join("", @overlap2), join("_",@block_size));
+}
+
+#################
+# cmpBlocks_cigar
+# input: output from cmpBlocks: [overlap1]:[overlap2]:[len1_len2_len3_len4_len5]
+# output: mM_iI_dD (small letters: integer)
+sub cmpBlocks_cigar {
+  my $in = $_[0];
+  my @e = split /:/, $in; 
+  my @overlap1 = split //, $e[0];
+  my @overlap2 = split //, $e[1];
+  my @size = split /_/, $e[2];
+  my @cigar;
+  for(my $i=0; $i<@overlap1; $i++) { 
+    next unless($overlap1[$i] || $overlap2[$i]); 
+    push @cigar, "$size[$i]M" if($overlap1[$i] && $overlap2[$i]);
+    push @cigar, "$size[$i]I" if($overlap1[$i] && !$overlap2[$i]);
+    push @cigar, "$size[$i]D" if(!$overlap1[$i] && $overlap2[$i]);
+  } 
+  ##TODO tide cigar
+  return(join "_", @cigar); 
+}
+#################
 # isoformCmpRst_blockNum
 # input: [overlap1]:[overlap2]:[len1_len2_len3_len4_len5]
 # output: number of len blocks
