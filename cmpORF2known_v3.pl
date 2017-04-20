@@ -135,6 +135,10 @@ foreach my $g (keys %GL_ORF) {
     for(my $q=0; $q<@intersectBeds; $q++) { 
       for(my $p=($q+1); $p<@intersectBeds; $p++) { 
         if(Blocks::bed12Size(Blocks::intersectBed($intersectBeds[$q], $intersectBeds[$p])) == 0) { 
+          my $type1 = &cmpORF($ORFs[$i], $intersectBed{$intersectBeds[$q]}); 
+          my $type2 = &cmpORF($ORFs[$i], $intersectBed{$intersectBeds[$p]}); 
+          #print "$type1\t$type2\n";
+          next if($type1 eq "diff-frame-isoform" || $type2 eq "diff-frame-isoform");
           my $oo = 0;
           for(; $oo<@intersectBeds; $oo++) { 
             last if($oo != $q && $oo != $p && 
@@ -196,6 +200,33 @@ sub cmpORF { ## cmp two overlap ORFs || overlap: N, C, in-frame/diff-frame/parti
     #print STDERR join "\n", ($a1,$a2,$int_end), "\n";
     return "C-term-divergence" if(&pos2bed12start($int_end, $a1) == &pos2bed12start($int_end, $a2));
   }
+  # isoforms
+  my @iii_s = split /,/, $iii[11];
+  my $n_diff_frame = 0; 
+  for(my $i=0; $i<$iii[9]; $i++) { 
+    my $pos = $iii[1] + $iii_s[$i]; 
+    my $pos_dist1 =  &pos2bed12start($pos, $a1);
+    my $pos_dist2 =  &pos2bed12start($pos, $a2);
+    #print STDERR "$pos_dist1 \t $pos_dist2\n";
+    $n_diff_frame ++ unless(($pos_dist1 % 3) == ($pos_dist2 % 3));
+  }
+  if($n_diff_frame == 0) { 
+    return "inframe-isoform"; 
+  } elsif ($n_diff_frame == $iii[9])  { 
+    return "diff-frame-isoform";
+  } else { 
+    return "partial-inframe-isoform";
+  }
+}
+
+sub ORF_align_cigar { ## cmp two overlap ORFs || overlap: N, C, in-frame/diff-frame/partial-inframe
+  my $a1 = $_[0]; # ORF in study
+  my $a2 = $_[1]; # annotated
+  #print STDERR "\n$a1\n$a2\n";
+  my @aa1 = split /\t/, $a1;
+  my @aa2 = split /\t/, $a2;
+  my $int_bed = Blocks::intersectBed($a1, $a2);
+  #print STDERR "$int_bed\n";
   # isoforms
   my @iii_s = split /,/, $iii[11];
   my $n_diff_frame = 0; 
