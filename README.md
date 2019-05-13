@@ -27,7 +27,7 @@ Tookit for full length transcriptome annotation analysis, including isoform dive
   _Usage_: IsoPairwiseCmp.pl <isoform.refflat> <comparing results>  
 
 * __cmpIso2known.pl__    
-  _Description_: Comparing one collection of transcript isoforms to an existing (e.g. RefSeq) collection
+  _Description_: Comparing one collection of transcript isoforms to an existing (e.g. RefSeq) collection   
   _Usage_: cmpIso2known.pl <new_collection_isoform.refflat> <known_isoform.refflat> <new_collection_isoform.refflat w/ results in an additional column>   
   _Note_: The comparison results would be useful for investigating co-occurrence of alternative RNA processing events  
 
