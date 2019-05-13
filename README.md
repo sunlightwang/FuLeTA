@@ -2,7 +2,8 @@
 
 Tookit for full length transcriptome annotation analysis, including isoform diversity, alternative splicing among transcripts, comparison to known transcriptome, splicing coupling, and their consequences on ORF diveristy. 
 
-* This is part of the rat hippocampus transcriptome annotation project, where hybrid sequencing technology (PacBio + Illumina) was applied to get full-length transcriptome landscape for rat hippocampus. 
+* This is part of the rat hippocampus transcriptome annotation project, where hybrid sequencing technology (PacBio + Illumina) was applied to get full-length transcriptome landscape for rat hippocampus.  
+* All the executables of different functions are based on the exon block analysis, which is very useful in comparison of isoform structure annotation. 
 
 ## Content
 
