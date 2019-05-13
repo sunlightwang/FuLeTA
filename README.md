@@ -6,13 +6,13 @@ Tookit for full length transcriptome annotation analysis, including isoform dive
 
 ## Content
 
-  1. isoform diversity analysis
+  1. Transcript isoform diversity analysis
 
-  2. alternative splicing events 
+  2. Alternative splicing events 
 
-  3. comparison to known transcriptome annotation 
+  3. Comparison to known transcriptome annotation 
 
-  4. co-occurance of alternative RNA processing events analysis
+  4. Co-occurrence of alternative RNA processing events analysis
 
   5. ORF diversity analysis
 
