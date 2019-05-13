@@ -24,8 +24,8 @@ Tookit for full length transcriptome annotation analysis, including isoform dive
   _Usage_: IsoDiv.pl <isoform.refflat> <isoform.refflat w/ results in an additional column>  
 
 * __IsoPairwiseCmp.pl__   
-  _Description_: Pairwise comparison for isoform differences in the same gene locus   
-  _Usage_: IsoPairwiseCmp.pl <isoform.refflat> <isoform comparison results>  
+  _Description_: Pairwise comparison for isoform differences in the same gene locus  
+  _Usage_: IsoPairwiseCmp.pl <isoform.refflat> <comparison results>  
 
 * __cmpIso2known.pl__    
   _Description_: Comparing one collection of transcript isoforms to an existing (e.g. RefSeq) collection   
