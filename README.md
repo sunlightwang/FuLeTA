@@ -16,5 +16,11 @@ Tookit for full length transcriptome annotation analysis, including isoform dive
 
   5. ORF diversity analysis
 
+## Usage
+
+* IsoDiv.pl -- compare each isoform to its nearest isoform in the annotation collection
+  Usage: IsoDiv.pl <isoform.refflat> <isoform.refflat w/ results in an additional column>
+
+
 ## Contact:
     xi (dot) wang (at) dkfz (dot) de
