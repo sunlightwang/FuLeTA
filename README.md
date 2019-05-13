@@ -39,3 +39,8 @@ Tookit for full length transcriptome annotation analysis, including isoform dive
 
 ## Contact:
     xi (dot) wang (at) dkfz (dot) de
+
+
+## Citation: 
+1.  Xi Wang, Xintian You, Jingyi Hou, Julian D. Langer, Fiona Rupprecht, Irena Vlatkovic, Claudia Quedenau, Georgi Tushev, Irina Epstein, Bernhard Schaefke, Wei Sun, Liang Fang, Guipeng Li, Yuhui Hu, Erin M Schuman, Wei Chen. (2019) __Full-length transcriptome reconstruction reveals a large diversity of RNA isoforms and open reading frames in the rat hippocampus__, _under review_. 
+
