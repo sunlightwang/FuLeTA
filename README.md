@@ -18,8 +18,11 @@ Tookit for full length transcriptome annotation analysis, including isoform dive
 
 ## Usage
 
-* IsoDiv.pl -- compare each isoform to its nearest isoform in the annotation collection
+* IsoDiv.pl -- comparing each isoform to its nearest isoform in the annotation collection  
   Usage: IsoDiv.pl <isoform.refflat> <isoform.refflat w/ results in an additional column>
+
+* IsoPairwiseCmp.pl  -- pairwise comparison of isoforms in the same gene locus 
+  Usage: IsoPairwiseCmp.pl <isoform.refflat> <comparing results>
 
 
 ## Contact:
