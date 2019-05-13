@@ -62,9 +62,8 @@ cmpORF2known_v3.pl example_data/FLT.rn6.chr15.bed example_data/RefSeq_CDS.rn6.ch
    
 
 ## Contact
-    xi (dot) wang (at) dkfz (dot) de   
-
-    for bug reporting or requiring additional functionality
+```xi (dot) wang (at) dkfz (dot) de  ```   
+for bug reporting or requiring additional functionality
 
 
 ## Citation
