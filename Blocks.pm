@@ -1,3 +1,5 @@
+#!/usr/bin/perl -w
+
 package Blocks;
 
 use strict;
@@ -435,6 +437,102 @@ sub cmpIsoform_refflat {
 }
 
 #################
+# cmpBlocks
+# input: bed12_new, bed12_known
+# output: [overlap1]:[overlap2]:[len1_len2_len3_len4_len5]
+sub cmpBlocks {
+  my $i1 = $_[0];
+  my $i2 = $_[1];
+  my @iso1 = split "\t", $i1;
+  my @iso2 = split "\t", $i2; 
+  return "NA" unless ($iso1[0] eq $iso2[0] && $iso1[5] eq $iso2[5]); 
+  return "NA" if($iso1[1] > $iso2[2] || $iso1[2] < $iso2[1]);
+  my @s1 = split ",", $iso1[11];
+  my @l1 = split ",", $iso1[10];
+  my @s2 = split ",", $iso2[11];
+  my @l2 = split ",", $iso2[10];
+  my (@es1, @ee1, @es2, @ee2); 
+  for(my $i=0; $i<$iso1[9]; $i++) { 
+    $es1[$i] = $s1[$i] + $iso1[1];
+    $ee1[$i] = $s1[$i] + $l1[$i] + $iso1[1];
+  }
+  for(my $i=0; $i<$iso2[9]; $i++) { 
+    $es2[$i] = $s2[$i] + $iso2[1];
+    $ee2[$i] = $s2[$i] + $l2[$i] + $iso2[1];
+  }
+  ## block boundaries 
+  my @uniq_bnd = sort {$a <=> $b} uniq (@es1, @ee1, @es2, @ee2);
+  my (@overlap1, @overlap2, @block_size); 
+  my $p1 = 0;
+  my $p2 = 0;
+  for(my $k=0; $k<$#uniq_bnd; $k++) { 
+    push @block_size, $uniq_bnd[$k+1] - $uniq_bnd[$k]; 
+    # p1 for isoform 1
+    if($p1 >= @es1 || $es1[$p1]>=$uniq_bnd[$k+1]) {
+      $overlap1[$k] = 0; 
+    } else {
+      $overlap1[$k] = 1;
+      if($ee1[$p1] == $uniq_bnd[$k+1]) {
+        $p1 ++;
+      }
+    }
+    # p2 for isoform 2 
+    if($p2 >= @es2 || $es2[$p2]>=$uniq_bnd[$k+1]) {
+      $overlap2[$k] = 0; 
+    } else {
+      $overlap2[$k] = 1;
+      if($ee2[$p2] == $uniq_bnd[$k+1]) {
+        $p2 ++;
+      }
+    }
+  }
+  ## @overlap1, @overlap2 have their values: 1 for exon, 0 for intron 
+  if($iso1[5] eq '-') { 
+    @overlap1 = reverse @overlap1;
+    @overlap2 = reverse @overlap2;
+    @block_size = reverse @block_size;
+  }
+  return join ":", (join("", @overlap1), join("", @overlap2), join("_",@block_size));
+}
+
+#################
+# cmpBlocks_cigar
+# input: output from cmpBlocks: [overlap1]:[overlap2]:[len1_len2_len3_len4_len5]
+# output: mM_iI_dD (small letters: integer)
+sub cmpBlocks_cigar {
+  my $in = $_[0];
+  my @e = split /:/, $in; 
+  my @overlap1 = split //, $e[0];
+  my @overlap2 = split //, $e[1];
+  my @size = split /_/, $e[2];
+  my (@cigar_size, @cigar_ch);
+  for(my $i=0; $i<@overlap1; $i++) { 
+    next unless($overlap1[$i] || $overlap2[$i]); 
+    push @cigar_size, "$size[$i]";
+    push @cigar_ch, "M" if($overlap1[$i] && $overlap2[$i]);
+    push @cigar_ch, "I" if($overlap1[$i] && !$overlap2[$i]);
+    push @cigar_ch, "D" if(!$overlap1[$i] && $overlap2[$i]);
+  } 
+  ##tidy cigar
+  my (@cigar_tidy_size, @cigar_tidy_ch, @cigar); 
+  my $idx = 0;
+  $cigar_tidy_size[$idx] = $cigar_size[0]; 
+  $cigar_tidy_ch[$idx] = $cigar_ch[0]; 
+  for(my $i=1; $i<@cigar_size; $i++) { 
+    if($cigar_tidy_ch[$idx] eq $cigar_ch[$i]) { 
+      $cigar_tidy_size[$idx] += $cigar_size[$i]; 
+    } else {
+      $idx ++; 
+      $cigar_tidy_ch[$idx] = $cigar_ch[$i];
+      $cigar_tidy_size[$idx] = $cigar_size[$i];
+    }
+  } 
+  for(my $i=0; $i<@cigar_tidy_size; $i++) {
+    $cigar[$i] = "$cigar_tidy_size[$i]$cigar_tidy_ch[$i]";
+  }
+  return(join "_", @cigar); 
+}
+#################
 # isoformCmpRst_blockNum
 # input: [overlap1]:[overlap2]:[len1_len2_len3_len4_len5]
 # output: number of len blocks
@@ -442,6 +540,22 @@ sub isoformCmpRst_blockNum {
   return "NA" if($_[0] eq "NA");
   my @a = split /:/, $_[0];
   return length $a[0];
+}
+
+#################
+# isoformCmpRst_diffblockNum
+# input: [overlap1]:[overlap2]:[len1_len2_len3_len4_len5]
+# output: number of diff blocks
+sub isoformCmpRst_diffblockNum {
+  return "NA" if($_[0] eq "NA");
+  my @a = split /:/, $_[0];
+  my @a0 = split //, $a[0]; 
+  my @a1 = split //, $a[1]; 
+  my @tmp; 
+  for my $i (0..$#a0) { 
+    push @tmp, abs($a1[$i] - $a0[$i]);
+  }
+  return sum(@tmp);
 }
 
 #################
@@ -525,12 +639,15 @@ sub isoformCmp_spliceType {
   my @type; 
   my @n;
   ### Tandem UTR can only be matched once
-  push @type, "Tandem5UTR" if($s[1] =~ /^1o1i/ || $s[1] =~ /^0i1i/); 
-  push @type, "Tandem3UTR" if($s[1] =~ /1i1o$/ || $s[1] =~ /1i0i$/); 
+  push @type, "Tandem5UTR.D" if($s[1] =~ /^1o1i/); 
+  push @type, "Tandem5UTR.P" if($s[1] =~ /^0i1i/); 
+  push @type, "Tandem3UTR.D" if($s[1] =~ /1i1o$/); 
+  push @type, "Tandem3UTR.P" if($s[1] =~ /1i0i$/); 
   #
   ### Alt first/last exons
   if($s[1] =~ /^1o0o/ || $s[1] =~ /^0i0o/) { 
-    push @type, "AltFirstExons"; 
+    push @type, "AltFirstExons.D" if($s[1] =~ /^1o0o/); 
+    push @type, "AltFirstExons.P" if($s[1] =~ /^0i0o/); 
     # adjust $s[0]
     if($s[1] =~ /^1o0o/) { 
       while($s[1] =~ /^1o0o([10io]+)$/) {$s[0] --; $s[1] = $1}
@@ -540,7 +657,8 @@ sub isoformCmp_spliceType {
     $s[0] ++ if($s[1] =~ /^1i/); # adjust back if start postion at splice site
   }
   if($s[1] =~ /0o1o$/ || $s[1] =~ /0o0i$/) {
-    push @type, "AltLastExons" ; 
+    push @type, "AltLastExons.D" if($s[1] =~ /0o1o$/); 
+    push @type, "AltLastExons.P" if($s[1] =~ /0o0i$/); 
     # adjust $s[0]
     if($s[1] =~ /0o1o$/) {
       while($s[1] =~ /^([10io]+)0o1o$/) {$s[0] --; $s[1] = $1}
@@ -561,8 +679,12 @@ sub isoformCmp_spliceType {
   if(@n = $s[1] =~ /(?=1i[10]?[io]?0o1o0o1o0o[10]?[io]?1i)/g) { push @type, ("BiAnnotExonSkipping") x scalar(@n); $s[0] = $s[0] - scalar(@n); } 
   if(@n = $s[1] =~ /(?=1i[10]?[io]?0o1o0o1o0o1o0o[10]?[io]?1i)/g) { push @type, ("TriAnnotExonSkipping") x scalar(@n); $s[0] = $s[0] - 2 * scalar(@n); }
   # Alt splice site
-  push @type, ("Alt3SS") x scalar(@n) if(@n = $s[1] =~ /0o[10][io]1i/g); 
-  push @type, ("Alt5SS") x scalar(@n) if(@n = $s[1] =~ /1i[10][io]0o/g);
+  #push @type, ("Alt3SS") x scalar(@n) if(@n = $s[1] =~ /0o[10][io]1i/g); 
+  #push @type, ("Alt5SS") x scalar(@n) if(@n = $s[1] =~ /1i[10][io]0o/g);
+  push @type, ("Alt3SS.5") x scalar(@n) if(@n = $s[1] =~ /0o1o1i/g); 
+  push @type, ("Alt3SS.3") x scalar(@n) if(@n = $s[1] =~ /0o0i1i/g); 
+  push @type, ("Alt5SS.5") x scalar(@n) if(@n = $s[1] =~ /1i0i0o/g);
+  push @type, ("Alt5SS.3") x scalar(@n) if(@n = $s[1] =~ /1i1o0o/g);
   # Intron retention
   push @type, ("IntronRetention") x scalar(@n) if(@n = $s[1] =~ /(?=1i1o1i)/g); 
   push @type, ("AnnotIntronRetention") x scalar(@n) if(@n = $s[1] =~ /(?=1i0i1i)/g); 

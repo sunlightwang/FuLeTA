@@ -3,7 +3,7 @@
 ########################################
 #
 # File Name:
-#   cmpORF2annot.pl
+#   cmpIso2known_v2.pl
 # 
 # Description:
 #   
@@ -66,14 +66,14 @@ my ($chr, $strand, $s, $e) = ("chr0", "+", 0, 0);
 my $gene_num = 0;
 foreach my $isof_key (sort { my @aa=split "_",$a; my @bb=split "_",$b; $aa[0] cmp $bb[0] || $aa[1] cmp $bb[1] || $aa[2] <=> $bb[2] } keys %isofs) {
   my @a = split /_/, $isof_key; 
-  if($chr ne $a[0] || $strand ne $a[1] || $a[2] > $e ) { # new gene loci
+  if($chr ne $a[0] || $strand ne $a[1] || $a[2] > $e ) { # next gene loci
     $gene_num ++;
     $chr = $a[0];
     $strand = $a[1];
     $s = $a[2];
     $e = $a[3];
   } else {
-    $e = max($e, $a[2]);
+    $e = max($e, $a[3]);
   }
   push @{$genes{$gene_num}}, $isof_key;
 }
@@ -109,7 +109,7 @@ foreach $gene_num (sort {$a <=> $b} keys %genes) {
       next if( Blocks::refflatSize(Blocks::intersectRefflat($new_isofs[$i], $known_isofs[$j])) == 0 ); ## non-overlap with current known isoform
       my $tmp = Blocks::cmpIsoform_refflat($new_isofs[$i], $known_isofs[$j], $min_5UTR_diff_len, $min_3UTR_diff_len); 
       next if($tmp eq "NA");
-      my $tmp_n = Blocks::isoformCmpRst_blockNum($tmp);
+      my $tmp_n = Blocks::isoformCmpRst_diffblockNum($tmp);
       my @tmp_a = split /\t/, $known_isofs[$j];
       #my $isof_cmp = join ":", ($cluster_gene_names, $tmp_a[1], Blocks::format_isoformCmpRst($tmp));
       my $isof_cmp = join ":", ($cluster_gene_names, $tmp_a[1], Blocks::isoformCmp_spliceType(Blocks::format_isoformCmpRst($tmp)));

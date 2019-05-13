@@ -38,6 +38,7 @@ while(<IN>) {
   my @a = split; 
   next if($a[6] == $a[7]);
   my @b = split /\|/, $a[3]; 
+  $b[0] =~ tr/_/-/;
   my $k = $b[0]."_".$a[0]."_".$a[5]; 
   my $ORF = Blocks::thickBed2CDSbed($_);
   push @{$GL_FLT{$k}}, $_;
@@ -79,6 +80,7 @@ foreach my $g (keys %GL_ORF) {
   my @ORFs = @{$GL_ORF{$g}}; 
   # get aORFs overlaping with ORFs from a GL
   my $k = $chr."_".$strand;
+  unless(exists $aORF{$k}) {print STDERR "$k: no annotation\n"; next;}
   my @aORFs = @{$aORF{$k}}; 
   my @aORFs_in = Blocks::bedLinesInRegion(\@aORFs, $GL_start_end{$g});
 
@@ -124,8 +126,10 @@ foreach my $g (keys %GL_ORF) {
         print OUT $ORFs[$i]."\t".$cluster_gene_names.":NA:ORF-5UTR_".$ORF_size_FL."\n"; #5UTR
       } elsif (($tmp_a[5] eq "-" && $tmp_a[2] < $tmp_s) || ($tmp_a[5] eq "+" && $tmp_a[1] > $tmp_e)) { 
         print OUT $ORFs[$i]."\t".$cluster_gene_names.":NA:ORF-3UTR_".$ORF_size_FL."\n"; #3UTR
-      } else {  # lies in intron
+      } elsif ( $tmp_a[1] > $tmp_s && $tmp_a[2] < $tmp_e ) {  # lies in intron
         print OUT $ORFs[$i]."\t".$cluster_gene_names.":NA:ORF-Intron_".$ORF_size_FL."\n"; #intron
+      } else {
+        print OUT $ORFs[$i]."\t".$cluster_gene_names.":NA:ORF-Arch_".$ORF_size_FL."\n"; #eg. 5UTR spaning CDS to 3UTR
       }
       next;
     }
@@ -135,6 +139,10 @@ foreach my $g (keys %GL_ORF) {
     for(my $q=0; $q<@intersectBeds; $q++) { 
       for(my $p=($q+1); $p<@intersectBeds; $p++) { 
         if(Blocks::bed12Size(Blocks::intersectBed($intersectBeds[$q], $intersectBeds[$p])) == 0) { 
+          my $type1 = &cmpORF($ORFs[$i], $intersectBed{$intersectBeds[$q]}); 
+          my $type2 = &cmpORF($ORFs[$i], $intersectBed{$intersectBeds[$p]}); 
+          #print "$type1\t$type2\n";
+          next if($type1 eq "diff-frame-isoform" || $type2 eq "diff-frame-isoform");
           my $oo = 0;
           for(; $oo<@intersectBeds; $oo++) { 
             last if($oo != $q && $oo != $p && 
@@ -161,9 +169,10 @@ foreach my $g (keys %GL_ORF) {
     }
     # others
     my $type = &cmpORF($ORFs[$i], $nearest_ORF); 
+    my $cigar = &ORF_align_cigar($ORFs[$i], $nearest_ORF); 
     my $ORF_size_annot = Blocks::bed12Size($nearest_ORF);
     $type = "ORF-Same" if($type eq "N-term-truncation" && ($ORF_size_annot - $ORF_size_FL) <= $NtermTruncBaseAllow);
-    print OUT $ORFs[$i]."\t".$cluster_gene_names.":".$nearest_ORF_a[3].":".$type."_".$ORF_size_FL."_".$ORF_size_annot."\n"; #other types
+    print OUT $ORFs[$i]."\t".$cluster_gene_names.":".$nearest_ORF_a[3].":".$type."_".$ORF_size_FL."_".$ORF_size_annot.":".$cigar."\n"; #other types
   }
 } 
 close OUT;
@@ -213,6 +222,49 @@ sub cmpORF { ## cmp two overlap ORFs || overlap: N, C, in-frame/diff-frame/parti
   } else { 
     return "partial-inframe-isoform";
   }
+}
+
+sub ORF_align_cigar { ## align two overlap ORFs for cigar
+  my $a1 = $_[0]; # ORF in study
+  my $a2 = $_[1]; # annotated
+  #my $int_bed = Blocks::intersectBed($a1, $a2);
+  my $raw_cigar = Blocks::cmpBlocks_cigar(Blocks::cmpBlocks($a1, $a2));
+  my $ORF_cigar = &ORF_frame_cigar($raw_cigar);
+  #print STDERR "$int_bed\n";
+  #print STDERR "$raw_cigar\n";
+  #print STDERR "$ORF_cigar\n";
+  #my @int = split /\t/, $int_bed; 
+  #my @int_l = split /,/, $int[10];
+  #my @int_s = split /,/, $int[11];
+  #for(my $i=0; $i<$int[9]; $i++) { 
+  #  my $pos = $int[1] + $int_s[$i]; 
+  #  my $pos_dist1 =  &pos2bed12start($pos, $a1);
+  #  my $pos_dist2 =  &pos2bed12start($pos, $a2);
+  #  print "diff frame\n" unless(($pos_dist1 % 3) == ($pos_dist2 % 3));
+  #}
+  return $ORF_cigar;
+}
+
+sub ORF_frame_cigar {
+  my $raw_cigar = $_[0]; 
+  my @e = split /_/, $raw_cigar;
+  my $res = 0; 
+  my ($ch, @cigar); 
+  for(my $i=0; $i<@e; $i++) { 
+    $e[$i] =~ /(\d+)([MID])/; 
+    if($2 eq "M") { 
+      $cigar[$i] = $e[$i] unless($res);
+      $cigar[$i] = $1."O" if($res);
+    } else {
+      $cigar[$i] = $e[$i];
+      if($2 eq "I") { 
+        $res = ($res + $1) % 3;
+      } else {
+        $res = ($res - $1) % 3;
+      }
+    }
+  }
+  return join "_", @cigar; 
 }
 
 sub pos2bed12start { 
