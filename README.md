@@ -37,10 +37,11 @@ Tookit for full length transcriptome annotation analysis, including isoform dive
   _Usage_: cmpORF2known.pl <ORF.bed> <known_ORF.bed> <ORF.bed w/ results in an additional column>     
 
 
-## Contact:
-    xi (dot) wang (at) dkfz (dot) de
+## Contact
+    xi (dot) wang (at) dkfz (dot) de   
+    for bug reporting or requiring additional functionality
 
 
-## Citation: 
+## Citation
 1.  Xi Wang, Xintian You, Jingyi Hou, Julian D. Langer, Fiona Rupprecht, Irena Vlatkovic, Claudia Quedenau, Georgi Tushev, Irina Epstein, Bernhard Schaefke, Wei Sun, Liang Fang, Guipeng Li, Yuhui Hu, Erin M Schuman, Wei Chen. (2019) __Full-length transcriptome reconstruction reveals a large diversity of RNA isoforms and open reading frames in the rat hippocampus__, _under review_. 
 
