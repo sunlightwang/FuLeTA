@@ -37,6 +37,21 @@ Tookit for full length transcriptome annotation analysis, including isoform dive
   _Usage_: cmpORF2known.pl <ORF.bed> <known_ORF.bed> <ORF.bed w/ results in an additional column>     
 
 
+## Examples  
+
+* __IsoDiv.pl__  
+    IsoDiv.pl example_data/FLT.rn6.chr15.refflat example_data/FLT.rn6.chr15.IsoDiv
+
+* __IsoPairwiseCmp.pl__   
+    IsoPairwiseCmp.pl example_data/FLT.rn6.chr15.refflat example_data/FLT.rn6.chr15.IsoPairwiseCmp
+
+* __cmpIso2known.pl__   
+    cmpIso2known_v2.pl example_data/FLT.rn6.chr15.refflat example_data/RefSeq.rn6.chr15.refflat example_data/FLT.rn6.chr15.cmpFLT2RefSeq
+
+* __cmpORF2known.pl__   
+    cmpORF2known_v3.pl example_data/FLT.rn6.chr15.bed example_data/RefSeq_CDS.rn6.chr15.bed example_data/FLT.rn6.chr15.cmpFLTORF2RefSeq
+   
+
 ## Contact
     xi (dot) wang (at) dkfz (dot) de   
     for bug reporting or requiring additional functionality
