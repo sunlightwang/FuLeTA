@@ -18,7 +18,7 @@ Tookit for full length transcriptome annotation analysis, including isoform dive
   5. ORF diversity analysis
 
 ## Installation
-1. Operating system requirement: Running perl (>= 5)
+1. Operating system requirement: any OS running perl (>= 5)
 2. Download the toolkit: 
 ```git clone https://github.com/sunlightwang/FuLeTA.git```
 3. Changed to the FuLeTA directory and run the scripts: 
