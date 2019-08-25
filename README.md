@@ -19,8 +19,12 @@ Tookit for full length transcriptome annotation analysis, including isoform dive
 
 ## Installation
 1. Operating system requirement: Running perl (>= 5)
-2. Download the toolkit: git clone https://github.com/sunlightwang/FuLeTA.git
-3. Changed to the FuLeTA directory and run the scripts: cd FuLeTA
+2. Download the toolkit: 
+```git clone https://github.com/sunlightwang/FuLeTA.git```
+3. Changed to the FuLeTA directory and run the scripts: 
+```cd FuLeTA```
+
+Expected time: a couple of minutes
 
 ## Usage
 
@@ -64,7 +68,7 @@ cmpIso2known_v2.pl example_data/FLT.rn6.chr15.refflat example_data/RefSeq.rn6.ch
 ```
 cmpORF2known_v3.pl example_data/FLT.rn6.chr15.bed example_data/RefSeq_CDS.rn6.chr15.bed example_data/FLT.rn6.chr15.cmpFLTORF2RefSeq  
 ```
-Running time: a couple of minutes
+Expected time: a couple of minutes
 
 ## Contact
 ```xi (dot) wang (at) dkfz (dot) de  ```   
