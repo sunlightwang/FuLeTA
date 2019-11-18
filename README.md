@@ -76,5 +76,4 @@ for bug reporting or requiring additional functionality
 
 
 ## Citation
-1.  Xi Wang, Xintian You, Jingyi Hou, Julian D. Langer, Fiona Rupprecht, Irena Vlatkovic, Claudia Quedenau, Georgi Tushev, Irina Epstein, Bernhard Schaefke, Wei Sun, Liang Fang, Guipeng Li, Yuhui Hu, Erin M Schuman, Wei Chen. (2019) __Full-length transcriptome reconstruction reveals a large diversity of RNA isoforms and open reading frames in the rat hippocampus__, _under review_. 
-
+1.  Xi Wang, Xintian You, Julian D. Langer, Jingyi Hou, Fiona Rupprecht, Irena Vlatkovic, Claudia Quedenau, Georgi Tushev, Irina Epstein, Bernhard Schaefke, Wei Sun, Liang Fang, Guipeng Li, Yuhui Hu, Erin M Schuman, Wei Chen. __Full-length transcriptome reconstruction reveals a large diversity of RNA and protein isoforms in rat hippocampus__. **Nat Commun** 10, 5009 (2019) [doi:10.1038/s41467-019-13037-0](doi:10.1038/s41467-019-13037-0)
